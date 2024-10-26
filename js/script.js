@@ -1,10 +1,20 @@
-// Clases para los productos
+// Clase para los productos
 class Producto {
     constructor(nombre, precio, talle) {
-        this.nombre = nombre
-        this.precio = precio
-        this.talle = talle
-        this.disponible = true // Indicador de disponibilidad
+        this.nombre = nombre;
+        this.precio = precio;
+        this.talle = talle;
+        this.disponible = true; // Indicador de disponibilidad
+    }
+
+    // Método para marcar el producto como NO disponible
+    marcarComoNoDisponible() {
+        this.disponible = false;
+    }
+
+    // Método para marcar el producto como SÍ disponible
+    marcarComoDisponible() {
+        this.disponible = true;
     }
 }
 
@@ -27,10 +37,10 @@ let total = 0
 const resetearCarrito = () => {
     carrito.length = 0 // Para vaciar el carrito
     total = 0 // Esto resetea el monto total a 0
-    // Para poner todos los productos como "Disponible" de nuevo
-    for (let i = 0; i < productos.length; i++) {
-        productos[i].disponible = true
-    }
+
+    // Uso del método para marcar el producto como NO disponible, para que lo aplique a todos los productos
+    productos.forEach(producto => producto.marcarComoDisponible());
+
     alert("Tu carrito ha sido reseteado.")
     verProductos() // Para volver a "Productos disponibles"
 }
@@ -65,13 +75,9 @@ const verProductos = () => {
     let mensaje = "Productos disponibles: \n\n"
 
     // Para mostrar todos los productos y si está Disponible o No disponible 
-    for (let i = 0; i < productos.length; i++) {
-        if (productos[i].disponible) {
-            mensaje += `${i + 1}. ${productos[i].nombre} - $${productos[i].precio} - Talle: ${productos[i].talle} (Disponible)\n`
-        } else {
-            mensaje += `${i + 1}. ${productos[i].nombre} - $${productos[i].precio} - Talle: ${productos[i].talle} (No disponible)\n`
-        }
-    }
+    productos.forEach((producto, index) => {
+        mensaje += `${index + 1}. ${producto.nombre} - $${producto.precio} - Talle: ${producto.talle} (${producto.disponible ? "Disponible" : "No disponible"})\n`
+    });
 
     // Opción para ir al carrito
     mensaje += `${productos.length + 1}. Ir al carrito \n`
@@ -87,8 +93,8 @@ const verProductos = () => {
 
     // Verificar si el producto está disponible
     if (seleccion >= 0 && seleccion < productos.length && productos[seleccion].disponible) {
-        // Para dejar el producto como No disponible antes de ir al carrito
-        productos[seleccion].disponible = false
+        // NUEVO: USO DEL MÉTODO `marcarComoNoDisponible()` PARA MARCAR EL PRODUCTO COMO NO DISPONIBLE
+        productos[seleccion].marcarComoNoDisponible();
 
         // Para agregar el producto al carrito
         carrito.push(productos[seleccion])
@@ -120,7 +126,7 @@ const verProductos = () => {
     } else if (seleccion >= 0 && seleccion < productos.length && !productos[seleccion].disponible) {
         // Alert si el producto no está disponible
         alert("Lo sentimos, el producto que seleccionaste ya no está disponible.")
-        verProductos() // Para volver a "Produtos disponibles"
+        verProductos() // Para volver a "Productos disponibles"
     } else {
         // Alert si ingresa un valor incorrecto
         alert("Opción inválida, por favor intenta nuevamente.")
