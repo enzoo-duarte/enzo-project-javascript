@@ -4,15 +4,13 @@ class Producto {
         this.nombre = nombre;
         this.precio = precio;
         this.talle = talle;
-        this.disponible = true; // Indicador de disponibilidad
+        this.disponible = true;
     }
 
-    // Método para marcar el producto como NO disponible
     marcarComoNoDisponible() {
         this.disponible = false;
     }
 
-    // Método para marcar el producto como SÍ disponible
     marcarComoDisponible() {
         this.disponible = true;
     }
@@ -25,194 +23,191 @@ let productos = [
     new Producto("Gorra de visera", 1000, "Ajustable"),
     new Producto("Campera de abrigo", 3500, "M"),
     new Producto("Buzo estampado", 2500, "M")
-]
+];
 
 // Array para el carrito de compras
-const carrito = []
-
-// Variable para acumular el total
-let total = 0
+const carrito = [];
+let total = 0;
 
 // Función para resetear el carrito
 const resetearCarrito = () => {
-    carrito.length = 0 // Para vaciar el carrito
-    total = 0 // Esto resetea el monto total a 0
-
-    // Uso del método para marcar el producto como NO disponible, para que lo aplique a todos los productos
+    carrito.length = 0;
+    total = 0;
     productos.forEach(producto => producto.marcarComoDisponible());
+    alert("Tu carrito ha sido reseteado.");
+    verProductos();
+};
 
-    alert("Tu carrito ha sido reseteado.")
-    verProductos() // Para volver a "Productos disponibles"
-}
+// NUEVA FUNCIÓN PARA RESETEAR FILTROS Y MOSTRAR PRODUCTOS SIN FILTRO
+const resetearFiltros = () => {
+    alert("Los filtros han sido reseteados. Mostrando todos los productos disponibles.");
+    verProductos();
+};
 
-// Función para mostrar el menú inicial
+// FUNCIÓN PARA MOSTRAR EL MENÚ INICIAL
 const mostrarMenu = () => {
-    let opcion = ""
+    let opcion = "";
 
     do {
         opcion = prompt(
             `Selecciona una opción:
 
     1. Ver productos disponibles.
-    2. Salir del simulador`
-        )
+    2. Aplicar filtros.
+    3. Salir del simulador`
+        );
 
         switch (opcion) {
             case "1":
-                verProductos()
-                break
+                verProductos();
+                break;
             case "2":
-                alert("Gracias por visitar Nexus Second Hand. ¡Hasta la próxima!")
-                break
+                mostrarFiltros();
+                break;
+            case "3":
+                alert("Gracias por visitar Nexus Second Hand. ¡Hasta la próxima!");
+                break;
             default:
-                alert("Opción inválida. Por favor, ingresa otro valor.")
+                alert("Opción inválida. Por favor, ingresa otro valor.");
         }
-    } while (opcion !== "2")
-}
+    } while (opcion !== "3");
+};
 
-// Función para "Productos disponibles"
+// FUNCIÓN PARA MOSTRAR LOS PRODUCTOS DISPONIBLES
 const verProductos = () => {
-    let mensaje = "Productos disponibles: \n\n"
+    let mensaje = "Productos disponibles:\n\n";
 
-    // Para mostrar todos los productos y si está Disponible o No disponible 
     productos.forEach((producto, index) => {
-        mensaje += `${index + 1}. ${producto.nombre} - $${producto.precio} - Talle: ${producto.talle} (${producto.disponible ? "Disponible" : "No disponible"})\n`
+        mensaje += `${index + 1}. ${producto.nombre} - $${producto.precio} - Talle: ${producto.talle} (${producto.disponible ? "Disponible" : "No disponible"})\n`;
     });
 
-    // Opción para ir al carrito
-    mensaje += `${productos.length + 1}. Ir al carrito \n`
+    mensaje += `${productos.length + 1}. Ir al carrito\n`;
 
-    // Prompt para ingresar el número de la opción elegida
-    let seleccion = parseInt(prompt(mensaje + "\nIngresa el número del producto que deseas agregar: ")) - 1
+    let seleccion = parseInt(prompt(mensaje + "\nIngresa el número del producto que deseas agregar:")) - 1;
 
-    // Verificar si ingresó la opción de "Ir al carrito" y mostrar los productos del carrito o si está vacío
     if (seleccion === productos.length) {
-        mostrarCarrito()
-        return
-    } 
+        mostrarCarrito();
+        return;
+    }
 
-    // Verificar si el producto está disponible
     if (seleccion >= 0 && seleccion < productos.length && productos[seleccion].disponible) {
-        // NUEVO: USO DEL MÉTODO `marcarComoNoDisponible()` PARA MARCAR EL PRODUCTO COMO NO DISPONIBLE
         productos[seleccion].marcarComoNoDisponible();
+        carrito.push(productos[seleccion]);
+        total += productos[seleccion].precio;
 
-        // Para agregar el producto al carrito
-        carrito.push(productos[seleccion])
+        alert(`${productos[seleccion].nombre} se ha agregado al carrito.`);
 
-        // Para sumar/acumular el precio al Total
-        total += productos[seleccion].precio
+        let seguirComprando = prompt("¿Deseas agregar otro producto? (si/no)").toLowerCase();
 
-        alert(`${productos[seleccion].nombre} se ha agregado al carrito.`)
-
-        // Para preguntar si desea agregar más productos
-        let seguirComprando
-
-        do {
-            seguirComprando = prompt("¿Deseas agregar otro producto? (si/no)").toLowerCase()
-
-            if (seguirComprando !== "si" && seguirComprando !== "no") {
-                alert("Opción inválida, por favor ingresa 'si' o 'no'.")
-            }
-                
-        } while (seguirComprando !== "si" && seguirComprando !== "no")
-
-        // Para que cuando elige "si" lo regrese a "Productos disponibles" ya mostrando si está Disponible o No disponible
         if (seguirComprando === "si") {
-            verProductos()
+            verProductos();
+        } else if (seguirComprando === "no") {
+            mostrarCarrito();
         } else {
-            mostrarCarrito() // Para que cuando elige "no" vaya al prompt del carrito y ya pregunte para confirmar compra
+            alert("Opción inválida, regresando a productos.");
+            verProductos();
         }
 
     } else if (seleccion >= 0 && seleccion < productos.length && !productos[seleccion].disponible) {
-        // Alert si el producto no está disponible
-        alert("Lo sentimos, el producto que seleccionaste ya no está disponible.")
-        verProductos() // Para volver a "Productos disponibles"
+        alert("Lo sentimos, el producto que seleccionaste ya no está disponible.");
+        verProductos();
     } else {
-        // Alert si ingresa un valor incorrecto
-        alert("Opción inválida, por favor intenta nuevamente.")
-        verProductos() // Para que vuelta a "Productos disponibles"
+        alert("Opción inválida, por favor intenta nuevamente.");
+        verProductos();
     }
-}
+};
 
-// Función para mostrar el carrito actual
-const mostrarCarrito = () => {
-    let mensajeCarrito = "Productos en tu carrito: \n\n"
+// FUNCIÓN PARA MOSTRAR PRODUCTOS FILTRADOS E INTERACTUAR CON ELLOS
+const mostrarProductosFiltrados = (productosFiltrados) => {
+    if (productosFiltrados.length === 0) {
+        alert("No se encontraron productos con ese filtro.");
+        verProductos();
+        return;
+    }
 
-    if (carrito.length === 0) {
-        // Alert con el mensaje de carrito vacío 
-        alert("Tu carrito está vacío.")
-        verProductos() // Para enseguida volver regresar a "Productos disponibles"
-    } else {
-        for (let i = 0; i < carrito.length; i++) {
-            mensajeCarrito += `${i + 1}. ${carrito[i].nombre}\n • $${carrito[i].precio}\n • Talle: ${carrito[i].talle}\n` // Lo que muestra el producto elegido
-        }
-        // Mostrar la lista de los productos que fueron agregados al carrito y el monto total de la compra
-        mensajeCarrito += `\nTotal a pagar: $${total}\n`
+    let mensaje = "Productos filtrados:\n\n";
 
-        // Prompt para confirmar la compra
-        let confirmacion
+    productosFiltrados.forEach((producto, index) => {
+        mensaje += `${index + 1}. ${producto.nombre} - $${producto.precio} - Talle: ${producto.talle} (${producto.disponible ? "Disponible" : "No disponible"})\n`;
+    });
 
-        do {
-            confirmacion = prompt(`${mensajeCarrito}\n¿Deseas confirmar tu compra o resetear el carrito? (si/no/resetear)`).toLowerCase()
+    // OPCIÓN NUEVA PARA RESETEAR FILTROS
+    mensaje += `${productosFiltrados.length + 1}. Resetear filtros\n`;
 
-            // Para que si el valor ingresado no es válido, muestre el alert de inválido y vuelva al prompt para confirmar
-            if (confirmacion !== "si" && confirmacion !== "no" && confirmacion !== "resetear") {
-                alert("Opción inválida, por favor ingrese 'si', 'no' o 'resetear'.")
-            }
+    let seleccion = parseInt(prompt(mensaje + "\nIngresa el número del producto que deseas agregar:")) - 1;
 
-        } while (confirmacion !== "si" && confirmacion !== "no" && confirmacion !== "resetear")
+    if (seleccion === productosFiltrados.length) {
+        resetearFiltros();
+        return;
+    }
 
-        // Lo que pasa luego de la confirmación
-        if (confirmacion === "si") {
-            seleccionarMetodoPago()
-        } else if (confirmacion === "resetear") {
-            resetearCarrito() // Acá llama a la función para resetear el carrito
+    if (seleccion >= 0 && seleccion < productosFiltrados.length && productosFiltrados[seleccion].disponible) {
+        productosFiltrados[seleccion].marcarComoNoDisponible();
+        carrito.push(productosFiltrados[seleccion]);
+        total += productosFiltrados[seleccion].precio;
+
+        alert(`${productosFiltrados[seleccion].nombre} se ha agregado al carrito.`);
+
+        let seguirComprando = prompt("¿Deseas agregar otro producto? (si/no)").toLowerCase();
+
+        if (seguirComprando === "si") {
+            mostrarProductosFiltrados(productosFiltrados);
+        } else if (seguirComprando === "no") {
+            mostrarCarrito();
         } else {
-            verProductos() // Para volver a "Productos disponibles"
+            alert("Opción inválida, regresando a productos filtrados.");
+            mostrarProductosFiltrados(productosFiltrados);
         }
+    } else if (seleccion >= 0 && seleccion < productosFiltrados.length && !productosFiltrados[seleccion].disponible) {
+        alert("Lo sentimos, el producto que seleccionaste ya no está disponible.");
+        mostrarProductosFiltrados(productosFiltrados);
+    } else {
+        alert("Opción inválida, por favor intenta nuevamente.");
+        mostrarProductosFiltrados(productosFiltrados);
     }
-}
+};
 
-// Función para elegir el método de pago
-const seleccionarMetodoPago = () => {
-    let metodoPago
+// FUNCIÓN PARA MOSTRAR FILTROS Y APLICARLOS
+const mostrarFiltros = () => {
+    let opcionFiltro = prompt(
+        `Selecciona un filtro:
+    1. Ordenar por precio (Menor a Mayor)
+    2. Ordenar por precio (Mayor a Menor)
+    3. Filtrar por rango de precio
+    4. Filtrar por categoría`
+    );
 
-    do {
-        metodoPago = prompt(
-            `Selecciona tu método de pago:
-    1. Transferencia
-    2. MercadoPago
-    3. Redes de Cobranza
-    4. Volver`
-        ).toLowerCase()
+    let productosFiltrados;
 
-        // Condición por si elige la opción para Volver
-        if (metodoPago === "4" || metodoPago === "volver") {
-            mostrarCarrito() // Volver a la pantalla de confirmación de compra
-            return
-        }
+    switch (opcionFiltro) {
+        case "1":
+            productosFiltrados = filtrarPrecioAscendente();
+            break;
+        case "2":
+            productosFiltrados = filtrarPrecioDescendente();
+            break;
+        case "3":
+            let min = parseInt(prompt("Ingresa el precio mínimo:"));
+            let max = parseInt(prompt("Ingresa el precio máximo:"));
+            productosFiltrados = filtrarPorRangoDePrecio(min, max);
+            break;
+        case "4":
+            let categoria = prompt("Ingresa la categoría (Indumentaria, Calzado, Accesorios):");
+            productosFiltrados = filtrarPorCategoria(categoria);
+            break;
+        default:
+            alert("Opción inválida. Intenta nuevamente.");
+            mostrarFiltros();
+            return;
+    }
 
-        // Validar el método de pago que se eligió
-        switch (metodoPago) {
-            case "1":
-            case "3":
-                // Alert para las opciones de Transferencia y Redes de Cobranza
-                alert("Un representante se pondrá en contacto contigo para que puedas finalizar tu compra.")
-                break
-            case "2":
-                // Alert para la opción MercadoPago
-                alert("Serás redirigido a MercadoPago para que puedas finalizar tu compra.")
-                break
-            default:
-                alert("Opción inválida, por favor intenta nuevamente.")
-        }
+    mostrarProductosFiltrados(productosFiltrados);
+};
 
-    } while (metodoPago !== "1" && metodoPago !== "2" && metodoPago !== "3")
+// Funciones de filtro
+const filtrarPrecioAscendente = () => productos.slice().sort((a, b) => a.precio - b.precio);
+const filtrarPrecioDescendente = () => productos.slice().sort((a, b) => b.precio - a.precio);
+const filtrarPorRangoDePrecio = (min, max) => productos.filter(producto => producto.precio >= min && producto.precio <= max);
+const filtrarPorCategoria = (categoria) => productos.filter(producto => producto.categoria?.toLowerCase() === categoria.toLowerCase());
 
-    // Mensaje de agradecimiento final
-    alert("¡Gracias por tu compra! Equipo de Nexus Second Hand.")
-    total = 0 // Esto resetea el total a 0 cuando se confirma/finaliza la compra
-}
-
-// Para mostrar el menú inicial del simulador 
-mostrarMenu()
+mostrarMenu();
