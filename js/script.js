@@ -1,213 +1,140 @@
 // Clase para los productos
 class Producto {
-    constructor(nombre, precio, talle) {
+    constructor(nombre, precio, talle, categoria, id, img) {
         this.nombre = nombre;
         this.precio = precio;
         this.talle = talle;
-        this.disponible = true;
-    }
-
-    marcarComoNoDisponible() {
-        this.disponible = false;
-    }
-
-    marcarComoDisponible() {
-        this.disponible = true;
+        this.categoria = categoria;
+        this.id = id;
+        this.img = img;
+        this.cantidad = 1;
     }
 }
 
-// Array para los productos disponibles
-let productos = [
-    new Producto("Camiseta", 1500, "L"),
-    new Producto("Zapatillas casuales", 4000, "40"),
-    new Producto("Gorra de visera", 1000, "Ajustable"),
-    new Producto("Campera de abrigo", 3500, "M"),
-    new Producto("Buzo estampado", 2500, "M")
+// Array para los productos disponibles con categorías
+const stockProductos = [
+    new Producto("Camiseta", 1500, "L", "Indumentaria", 1, "https://via.placeholder.com/150"),
+    new Producto("Zapatillas", 4000, "40", "Calzado", 2, "https://via.placeholder.com/150"),
+    new Producto("Gorra", 1000, "Ajustable", "Accesorios", 3, "https://via.placeholder.com/150"),
+    new Producto("Campera de abrigo", 3500, "M", "Indumentaria", 4, "https://via.placeholder.com/150"),
+    new Producto("Buzo estampado", 2500, "M", "Indumentaria", 5, "https://via.placeholder.com/150"),
 ];
 
-// Array para el carrito de compras
-const carrito = [];
-let total = 0;
+// Carrito de compras
+const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+const contenedorProductos = document.getElementById("contenedor-productos");
+const contenedorCarrito = document.getElementById("contenedor-carrito");
+const totalCarrito = document.getElementById("total-carrito");
 
-// Función para resetear el carrito
-const resetearCarrito = () => {
+// Función para mostrar una notificación
+const mostrarNotificacion = (mensaje) => {
+    const notificacion = document.createElement("div");
+    notificacion.classList.add("notificacion");
+    notificacion.textContent = mensaje;
+    document.body.appendChild(notificacion);
+
+    setTimeout(() => {
+        notificacion.remove();
+    }, 2000);
+};
+
+// Renderizar productos en el DOM
+const renderizarProductos = (array) => {
+    contenedorProductos.innerHTML = "";
+
+    array.forEach((prd) => {
+        const div = document.createElement("div");
+        div.classList.add("producto", "card", "m-2");
+        div.style.width = "18rem";
+        div.innerHTML = `
+            <img src="${prd.img}" class="card-img-top" alt="${prd.nombre}">
+            <div class="card-body">
+                <h5 class="card-title">${prd.nombre}</h5>
+                <p class="card-text">$${prd.precio}</p>
+                <button id="agregar${prd.id}" class="btn btn-primary">Comprar</button>
+            </div>
+        `;
+        contenedorProductos.appendChild(div);
+
+        const boton = document.getElementById(`agregar${prd.id}`);
+        boton.addEventListener("click", () => agregarAlCarrito(prd));
+    });
+};
+
+// Función para agregar productos al carrito
+const agregarAlCarrito = (producto) => {
+    const prodExistente = carrito.find((prod) => prod.id === producto.id);
+
+    if (prodExistente) {
+        prodExistente.cantidad++;
+    } else {
+        carrito.push({ ...producto });
+    }
+    mostrarNotificacion(`${producto.nombre} agregado al carrito`);
+    actualizarCarrito();
+};
+
+// Actualizar carrito en el DOM
+const actualizarCarrito = () => {
+    contenedorCarrito.innerHTML = "";
+    carrito.forEach((producto) => {
+        const div = document.createElement("div");
+        div.classList.add("producto");
+        div.innerHTML = `
+            <h5>${producto.nombre}</h5>
+            <p>Precio: $${producto.precio}</p>
+            <p>Cantidad: ${producto.cantidad}</p>
+            <button onclick="eliminarDelCarrito(${producto.id})" class="btn btn-danger">Eliminar</button>
+        `;
+        contenedorCarrito.appendChild(div);
+    });
+    totalCarrito.textContent = `Total: $${carrito.reduce((acc, prod) => acc + prod.precio * prod.cantidad, 0)}`;
+    localStorage.setItem("carrito", JSON.stringify(carrito));
+};
+
+// Eliminar producto del carrito
+const eliminarDelCarrito = (id) => {
+    const index = carrito.findIndex((prod) => prod.id === id);
+    if (index !== -1) {
+        carrito.splice(index, 1);
+        actualizarCarrito();
+    }
+};
+
+// Resetear carrito
+document.getElementById("resetear-carrito").addEventListener("click", () => {
     carrito.length = 0;
-    total = 0;
-    productos.forEach(producto => producto.marcarComoDisponible());
-    alert("Tu carrito ha sido reseteado.");
-    verProductos();
-};
+    actualizarCarrito();
+});
 
-// NUEVA FUNCIÓN PARA RESETEAR FILTROS Y MOSTRAR PRODUCTOS SIN FILTRO
-const resetearFiltros = () => {
-    alert("Los filtros han sido reseteados. Mostrando todos los productos disponibles.");
-    verProductos();
-};
-
-// FUNCIÓN PARA MOSTRAR EL MENÚ INICIAL
-const mostrarMenu = () => {
-    let opcion = "";
-
-    do {
-        opcion = prompt(
-            `Selecciona una opción:
-
-    1. Ver productos disponibles.
-    2. Aplicar filtros.
-    3. Salir del simulador`
-        );
-
-        switch (opcion) {
-            case "1":
-                verProductos();
-                break;
-            case "2":
-                mostrarFiltros();
-                break;
-            case "3":
-                alert("Gracias por visitar Nexus Second Hand. ¡Hasta la próxima!");
-                break;
-            default:
-                alert("Opción inválida. Por favor, ingresa otro valor.");
-        }
-    } while (opcion !== "3");
-};
-
-// FUNCIÓN PARA MOSTRAR LOS PRODUCTOS DISPONIBLES
-const verProductos = () => {
-    let mensaje = "Productos disponibles:\n\n";
-
-    productos.forEach((producto, index) => {
-        mensaje += `${index + 1}. ${producto.nombre} - $${producto.precio} - Talle: ${producto.talle} (${producto.disponible ? "Disponible" : "No disponible"})\n`;
-    });
-
-    mensaje += `${productos.length + 1}. Ir al carrito\n`;
-
-    let seleccion = parseInt(prompt(mensaje + "\nIngresa el número del producto que deseas agregar:")) - 1;
-
-    if (seleccion === productos.length) {
-        mostrarCarrito();
-        return;
-    }
-
-    if (seleccion >= 0 && seleccion < productos.length && productos[seleccion].disponible) {
-        productos[seleccion].marcarComoNoDisponible();
-        carrito.push(productos[seleccion]);
-        total += productos[seleccion].precio;
-
-        alert(`${productos[seleccion].nombre} se ha agregado al carrito.`);
-
-        let seguirComprando = prompt("¿Deseas agregar otro producto? (si/no)").toLowerCase();
-
-        if (seguirComprando === "si") {
-            verProductos();
-        } else if (seguirComprando === "no") {
-            mostrarCarrito();
-        } else {
-            alert("Opción inválida, regresando a productos.");
-            verProductos();
-        }
-
-    } else if (seleccion >= 0 && seleccion < productos.length && !productos[seleccion].disponible) {
-        alert("Lo sentimos, el producto que seleccionaste ya no está disponible.");
-        verProductos();
+// Filtrar productos por categoría desde el navbar
+const filtrarPorCategoria = (categoria) => {
+    if (categoria === "Todo") {
+        renderizarProductos(stockProductos);
     } else {
-        alert("Opción inválida, por favor intenta nuevamente.");
-        verProductos();
+        const productosFiltrados = stockProductos.filter((prod) => prod.categoria === categoria);
+        renderizarProductos(productosFiltrados);
     }
 };
 
-// FUNCIÓN PARA MOSTRAR PRODUCTOS FILTRADOS E INTERACTUAR CON ELLOS
-const mostrarProductosFiltrados = (productosFiltrados) => {
-    if (productosFiltrados.length === 0) {
-        alert("No se encontraron productos con ese filtro.");
-        verProductos();
-        return;
-    }
+// Enlaces de navegación para filtrar productos
+document.getElementById("nav-todos").addEventListener("click", (e) => {
+    e.preventDefault();
+    filtrarPorCategoria("Todo");
+});
+document.getElementById("nav-indumentaria").addEventListener("click", (e) => {
+    e.preventDefault();
+    filtrarPorCategoria("Indumentaria");
+});
+document.getElementById("nav-calzado").addEventListener("click", (e) => {
+    e.preventDefault();
+    filtrarPorCategoria("Calzado");
+});
+document.getElementById("nav-accesorios").addEventListener("click", (e) => {
+    e.preventDefault();
+    filtrarPorCategoria("Accesorios");
+});
 
-    let mensaje = "Productos filtrados:\n\n";
-
-    productosFiltrados.forEach((producto, index) => {
-        mensaje += `${index + 1}. ${producto.nombre} - $${producto.precio} - Talle: ${producto.talle} (${producto.disponible ? "Disponible" : "No disponible"})\n`;
-    });
-
-    // OPCIÓN NUEVA PARA RESETEAR FILTROS
-    mensaje += `${productosFiltrados.length + 1}. Resetear filtros\n`;
-
-    let seleccion = parseInt(prompt(mensaje + "\nIngresa el número del producto que deseas agregar:")) - 1;
-
-    if (seleccion === productosFiltrados.length) {
-        resetearFiltros();
-        return;
-    }
-
-    if (seleccion >= 0 && seleccion < productosFiltrados.length && productosFiltrados[seleccion].disponible) {
-        productosFiltrados[seleccion].marcarComoNoDisponible();
-        carrito.push(productosFiltrados[seleccion]);
-        total += productosFiltrados[seleccion].precio;
-
-        alert(`${productosFiltrados[seleccion].nombre} se ha agregado al carrito.`);
-
-        let seguirComprando = prompt("¿Deseas agregar otro producto? (si/no)").toLowerCase();
-
-        if (seguirComprando === "si") {
-            mostrarProductosFiltrados(productosFiltrados);
-        } else if (seguirComprando === "no") {
-            mostrarCarrito();
-        } else {
-            alert("Opción inválida, regresando a productos filtrados.");
-            mostrarProductosFiltrados(productosFiltrados);
-        }
-    } else if (seleccion >= 0 && seleccion < productosFiltrados.length && !productosFiltrados[seleccion].disponible) {
-        alert("Lo sentimos, el producto que seleccionaste ya no está disponible.");
-        mostrarProductosFiltrados(productosFiltrados);
-    } else {
-        alert("Opción inválida, por favor intenta nuevamente.");
-        mostrarProductosFiltrados(productosFiltrados);
-    }
-};
-
-// FUNCIÓN PARA MOSTRAR FILTROS Y APLICARLOS
-const mostrarFiltros = () => {
-    let opcionFiltro = prompt(
-        `Selecciona un filtro:
-    1. Ordenar por precio (Menor a Mayor)
-    2. Ordenar por precio (Mayor a Menor)
-    3. Filtrar por rango de precio
-    4. Filtrar por categoría`
-    );
-
-    let productosFiltrados;
-
-    switch (opcionFiltro) {
-        case "1":
-            productosFiltrados = filtrarPrecioAscendente();
-            break;
-        case "2":
-            productosFiltrados = filtrarPrecioDescendente();
-            break;
-        case "3":
-            let min = parseInt(prompt("Ingresa el precio mínimo:"));
-            let max = parseInt(prompt("Ingresa el precio máximo:"));
-            productosFiltrados = filtrarPorRangoDePrecio(min, max);
-            break;
-        case "4":
-            let categoria = prompt("Ingresa la categoría (Indumentaria, Calzado, Accesorios):");
-            productosFiltrados = filtrarPorCategoria(categoria);
-            break;
-        default:
-            alert("Opción inválida. Intenta nuevamente.");
-            mostrarFiltros();
-            return;
-    }
-
-    mostrarProductosFiltrados(productosFiltrados);
-};
-
-// Funciones de filtro
-const filtrarPrecioAscendente = () => productos.slice().sort((a, b) => a.precio - b.precio);
-const filtrarPrecioDescendente = () => productos.slice().sort((a, b) => b.precio - a.precio);
-const filtrarPorRangoDePrecio = (min, max) => productos.filter(producto => producto.precio >= min && producto.precio <= max);
-const filtrarPorCategoria = (categoria) => productos.filter(producto => producto.categoria?.toLowerCase() === categoria.toLowerCase());
-
-mostrarMenu();
+// Inicializar
+renderizarProductos(stockProductos);
+actualizarCarrito();
