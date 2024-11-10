@@ -1,218 +1,141 @@
 // Clase para los productos
 class Producto {
-    constructor(nombre, precio, talle) {
+    constructor(nombre, precio, talle, categoria, id, img) {
         this.nombre = nombre;
         this.precio = precio;
         this.talle = talle;
-        this.disponible = true; // Indicador de disponibilidad
-    }
-
-    // Método para marcar el producto como NO disponible
-    marcarComoNoDisponible() {
-        this.disponible = false;
-    }
-
-    // Método para marcar el producto como SÍ disponible
-    marcarComoDisponible() {
-        this.disponible = true;
+        this.categoria = categoria;
+        this.id = id;
+        this.img = img;
+        this.cantidad = 1;
     }
 }
 
-// Array para los productos disponibles
-let productos = [
-    new Producto("Camiseta", 1500, "L"),
-    new Producto("Zapatillas casuales", 4000, "40"),
-    new Producto("Gorra de visera", 1000, "Ajustable"),
-    new Producto("Campera de abrigo", 3500, "M"),
-    new Producto("Buzo estampado", 2500, "M")
-]
+// Array para los productos disponibles con categorías
+const stockProductos = [
+    new Producto("Camiseta", 1500, "L", "Indumentaria", 1, "https://via.placeholder.com/150"),
+    new Producto("Zapatillas", 4000, "40", "Calzado", 2, "https://via.placeholder.com/150"),
+    new Producto("Gorra", 1000, "Ajustable", "Accesorios", 3, "https://via.placeholder.com/150"),
+    new Producto("Campera de abrigo", 3500, "M", "Indumentaria", 4, "https://via.placeholder.com/150"),
+    new Producto("Buzo estampado", 2500, "M", "Indumentaria", 5, "https://via.placeholder.com/150"),
+];
 
-// Array para el carrito de compras
-const carrito = []
+// Carrito de compras
+const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+const contenedorProductos = document.getElementById("contenedor-productos");
+const contenedorCarrito = document.getElementById("contenedor-carrito");
+const totalCarrito = document.getElementById("total-carrito");
 
-// Variable para acumular el total
-let total = 0
+// Función para mostrar una notificación
+const mostrarNotificacion = (mensaje) => {
+    const notificacion = document.createElement("div");
+    notificacion.classList.add("notificacion");
+    notificacion.textContent = mensaje;
+    document.body.appendChild(notificacion);
 
-// Función para resetear el carrito
-const resetearCarrito = () => {
-    carrito.length = 0 // Para vaciar el carrito
-    total = 0 // Esto resetea el monto total a 0
+    setTimeout(() => {
+        notificacion.remove();
+    }, 2000);
+};
 
-    // Uso del método para marcar el producto como NO disponible, para que lo aplique a todos los productos
-    productos.forEach(producto => producto.marcarComoDisponible());
+// Renderizar productos en el DOM
+const renderizarProductos = (array) => {
+    contenedorProductos.innerHTML = "";
 
-    alert("Tu carrito ha sido reseteado.")
-    verProductos() // Para volver a "Productos disponibles"
-}
+    array.forEach((prd) => {
+        const div = document.createElement("div");
+        div.classList.add("producto", "card", "m-2");
+        div.style.width = "18rem";
+        div.innerHTML = `
+            <img src="${prd.img}" class="card-img-top" alt="${prd.nombre}">
+            <div class="card-body">
+                <h5 class="card-title">${prd.nombre}</h5>
+                <p class="card-text">$${prd.precio}</p>
+                <button id="agregar${prd.id}" class="btn btn-primary">Comprar</button>
+            </div>
+        `;
+        contenedorProductos.appendChild(div);
 
-// Función para mostrar el menú inicial
-const mostrarMenu = () => {
-    let opcion = ""
-
-    do {
-        opcion = prompt(
-            `Selecciona una opción:
-
-    1. Ver productos disponibles.
-    2. Salir del simulador`
-        )
-
-        switch (opcion) {
-            case "1":
-                verProductos()
-                break
-            case "2":
-                alert("Gracias por visitar Nexus Second Hand. ¡Hasta la próxima!")
-                break
-            default:
-                alert("Opción inválida. Por favor, ingresa otro valor.")
-        }
-    } while (opcion !== "2")
-}
-
-// Función para "Productos disponibles"
-const verProductos = () => {
-    let mensaje = "Productos disponibles: \n\n"
-
-    // Para mostrar todos los productos y si está Disponible o No disponible 
-    productos.forEach((producto, index) => {
-        mensaje += `${index + 1}. ${producto.nombre} - $${producto.precio} - Talle: ${producto.talle} (${producto.disponible ? "Disponible" : "No disponible"})\n`
+        const boton = document.getElementById(`agregar${prd.id}`);
+        boton.addEventListener("click", () => agregarAlCarrito(prd));
     });
+};
 
-    // Opción para ir al carrito
-    mensaje += `${productos.length + 1}. Ir al carrito \n`
+// Función para agregar productos al carrito
+const agregarAlCarrito = (producto) => {
+    const prodExistente = carrito.find((prod) => prod.id === producto.id);
 
-    // Prompt para ingresar el número de la opción elegida
-    let seleccion = parseInt(prompt(mensaje + "\nIngresa el número del producto que deseas agregar: ")) - 1
-
-    // Verificar si ingresó la opción de "Ir al carrito" y mostrar los productos del carrito o si está vacío
-    if (seleccion === productos.length) {
-        mostrarCarrito()
-        return
-    } 
-
-    // Verificar si el producto está disponible
-    if (seleccion >= 0 && seleccion < productos.length && productos[seleccion].disponible) {
-        // NUEVO: USO DEL MÉTODO `marcarComoNoDisponible()` PARA MARCAR EL PRODUCTO COMO NO DISPONIBLE
-        productos[seleccion].marcarComoNoDisponible();
-
-        // Para agregar el producto al carrito
-        carrito.push(productos[seleccion])
-
-        // Para sumar/acumular el precio al Total
-        total += productos[seleccion].precio
-
-        alert(`${productos[seleccion].nombre} se ha agregado al carrito.`)
-
-        // Para preguntar si desea agregar más productos
-        let seguirComprando
-
-        do {
-            seguirComprando = prompt("¿Deseas agregar otro producto? (si/no)").toLowerCase()
-
-            if (seguirComprando !== "si" && seguirComprando !== "no") {
-                alert("Opción inválida, por favor ingresa 'si' o 'no'.")
-            }
-                
-        } while (seguirComprando !== "si" && seguirComprando !== "no")
-
-        // Para que cuando elige "si" lo regrese a "Productos disponibles" ya mostrando si está Disponible o No disponible
-        if (seguirComprando === "si") {
-            verProductos()
-        } else {
-            mostrarCarrito() // Para que cuando elige "no" vaya al prompt del carrito y ya pregunte para confirmar compra
-        }
-
-    } else if (seleccion >= 0 && seleccion < productos.length && !productos[seleccion].disponible) {
-        // Alert si el producto no está disponible
-        alert("Lo sentimos, el producto que seleccionaste ya no está disponible.")
-        verProductos() // Para volver a "Productos disponibles"
+    if (prodExistente) {
+        prodExistente.cantidad++;
     } else {
-        // Alert si ingresa un valor incorrecto
-        alert("Opción inválida, por favor intenta nuevamente.")
-        verProductos() // Para que vuelta a "Productos disponibles"
+        carrito.push({ ...producto });
     }
-}
+    mostrarNotificacion(`${producto.nombre} agregado al carrito`);
+    actualizarCarrito();
+};
 
-// Función para mostrar el carrito actual
-const mostrarCarrito = () => {
-    let mensajeCarrito = "Productos en tu carrito: \n\n"
+// Actualizar carrito en el DOM
+const actualizarCarrito = () => {
+    contenedorCarrito.innerHTML = "";
+    carrito.forEach((producto) => {
+        const div = document.createElement("div");
+        div.classList.add("producto");
+        div.innerHTML = `
+            <h5>${producto.nombre}</h5>
+            <p>Precio: $${producto.precio}</p>
+            <p>Cantidad: ${producto.cantidad}</p>
+            <button onclick="eliminarDelCarrito(${producto.id})" class="btn btn-danger">Eliminar</button>
+        `;
+        contenedorCarrito.appendChild(div);
+    });
+    totalCarrito.textContent = `Total: $${carrito.reduce((acc, prod) => acc + prod.precio * prod.cantidad, 0)}`;
+    localStorage.setItem("carrito", JSON.stringify(carrito));
+};
 
-    if (carrito.length === 0) {
-        // Alert con el mensaje de carrito vacío 
-        alert("Tu carrito está vacío.")
-        verProductos() // Para enseguida volver regresar a "Productos disponibles"
+// Eliminar producto del carrito
+const eliminarDelCarrito = (id) => {
+    const index = carrito.findIndex((prod) => prod.id === id);
+    if (index !== -1) {
+        carrito.splice(index, 1);
+        actualizarCarrito();
+    }
+};
+
+// Resetear carrito
+document.getElementById("resetear-carrito").addEventListener("click", () => {
+    carrito.length = 0;
+    actualizarCarrito();
+});
+
+// Filtrar productos por categoría desde el navbar
+const filtrarPorCategoria = (categoria) => {
+    if (categoria === "Todo") {
+        renderizarProductos(stockProductos);
     } else {
-        for (let i = 0; i < carrito.length; i++) {
-            mensajeCarrito += `${i + 1}. ${carrito[i].nombre}\n • $${carrito[i].precio}\n • Talle: ${carrito[i].talle}\n` // Lo que muestra el producto elegido
-        }
-        // Mostrar la lista de los productos que fueron agregados al carrito y el monto total de la compra
-        mensajeCarrito += `\nTotal a pagar: $${total}\n`
-
-        // Prompt para confirmar la compra
-        let confirmacion
-
-        do {
-            confirmacion = prompt(`${mensajeCarrito}\n¿Deseas confirmar tu compra o resetear el carrito? (si/no/resetear)`).toLowerCase()
-
-            // Para que si el valor ingresado no es válido, muestre el alert de inválido y vuelva al prompt para confirmar
-            if (confirmacion !== "si" && confirmacion !== "no" && confirmacion !== "resetear") {
-                alert("Opción inválida, por favor ingrese 'si', 'no' o 'resetear'.")
-            }
-
-        } while (confirmacion !== "si" && confirmacion !== "no" && confirmacion !== "resetear")
-
-        // Lo que pasa luego de la confirmación
-        if (confirmacion === "si") {
-            seleccionarMetodoPago()
-        } else if (confirmacion === "resetear") {
-            resetearCarrito() // Acá llama a la función para resetear el carrito
-        } else {
-            verProductos() // Para volver a "Productos disponibles"
-        }
+        const productosFiltrados = stockProductos.filter((prod) => prod.categoria === categoria);
+        renderizarProductos(productosFiltrados);
     }
-}
+};
 
-// Función para elegir el método de pago
-const seleccionarMetodoPago = () => {
-    let metodoPago
+// Enlaces de navegación para filtrar productos
+document.getElementById("nav-todos").addEventListener("click", (e) => {
+    e.preventDefault();
+    filtrarPorCategoria("Todo");
+});
+document.getElementById("nav-indumentaria").addEventListener("click", (e) => {
+    e.preventDefault();
+    filtrarPorCategoria("Indumentaria");
+});
+document.getElementById("nav-calzado").addEventListener("click", (e) => {
+    e.preventDefault();
+    filtrarPorCategoria("Calzado");
+});
+document.getElementById("nav-accesorios").addEventListener("click", (e) => {
+    e.preventDefault();
+    filtrarPorCategoria("Accesorios");
+});
 
-    do {
-        metodoPago = prompt(
-            `Selecciona tu método de pago:
-    1. Transferencia
-    2. MercadoPago
-    3. Redes de Cobranza
-    4. Volver`
-        ).toLowerCase()
+// Inicializar
+renderizarProductos(stockProductos);
+actualizarCarrito();
 
-        // Condición por si elige la opción para Volver
-        if (metodoPago === "4" || metodoPago === "volver") {
-            mostrarCarrito() // Volver a la pantalla de confirmación de compra
-            return
-        }
-
-        // Validar el método de pago que se eligió
-        switch (metodoPago) {
-            case "1":
-            case "3":
-                // Alert para las opciones de Transferencia y Redes de Cobranza
-                alert("Un representante se pondrá en contacto contigo para que puedas finalizar tu compra.")
-                break
-            case "2":
-                // Alert para la opción MercadoPago
-                alert("Serás redirigido a MercadoPago para que puedas finalizar tu compra.")
-                break
-            default:
-                alert("Opción inválida, por favor intenta nuevamente.")
-        }
-
-    } while (metodoPago !== "1" && metodoPago !== "2" && metodoPago !== "3")
-
-    // Mensaje de agradecimiento final
-    alert("¡Gracias por tu compra! Equipo de Nexus Second Hand.")
-    total = 0 // Esto resetea el total a 0 cuando se confirma/finaliza la compra
-}
-
-// Para mostrar el menú inicial del simulador 
-mostrarMenu()
