@@ -50,6 +50,7 @@ const renderizarProductos = (array) => {
             <img src="${prd.img}" class="card-img-top" alt="${prd.nombre}">
             <div class="card-body">
                 <h5 class="card-title">${prd.nombre}</h5>
+                <p class="card-text">Talle ${prd.talle}</p>
                 <p class="card-text">$${prd.precio}</p>
                 <button id="agregar${prd.id}" class="btn btn-primary">Comprar</button>
             </div>
@@ -70,7 +71,7 @@ const agregarAlCarrito = (producto) => {
     } else {
         carrito.push({ ...producto });
     }
-    mostrarNotificacion(`${producto.nombre} agregado al carrito`);
+    mostrarNotificacion(`${producto.nombre} se ha agregado al carrito`);
     actualizarCarrito();
 };
 
