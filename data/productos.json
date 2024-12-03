@@ -1,0 +1,74 @@
+[
+    {
+        "id": 1,
+        "img": "./img/camiseta.png",
+        "nombre": "Camiseta Volcom",
+        "talle": ["S", "M", "L", "XL"],
+        "precio": 35,
+        "categoria": "indumentaria"
+    },
+    {
+        "id": 2,
+        "img": "./img/zapatillas.png",
+        "nombre": "Zapatillas Adidas",
+        "talle": ["36", "37", "38", "39", "40", "41", "42", "43", "44"],
+        "precio": 95,
+        "categoria": "calzado"
+    },
+    {
+        "id": 3,
+        "img": "./img/gorra.png",
+        "nombre": "Gorra Stance",
+        "talle": ["Único"],
+        "precio": 25,
+        "categoria": "accesorios"
+    },
+    {
+        "id": 4,
+        "img": "./img/campera.png",
+        "nombre": "Campera Volcom",
+        "talle": ["S", "M", "L", "XL"],
+        "precio": 85,
+        "categoria": "indumentaria"
+    },
+    {
+        "id": 5,
+        "img": "./img/buzo.png",
+        "nombre": "Buzo Vans",
+        "talle": ["S", "M", "L", "XL"],
+        "precio": 60,
+        "categoria": "indumentaria"
+    },
+    {
+        "id": 6,
+        "img": "./img/ojotas.png",
+        "nombre": "Ojotas Adidas",
+        "talle": ["36", "37", "38", "39", "40", "41", "42", "43", "44"],
+        "precio": 50,
+        "categoria": "calzado"
+    },
+    {
+        "id": 7,
+        "img": "./img/rinonera.png",
+        "nombre": "Riñonera Volcom",
+        "talle": ["Único"],
+        "precio": 30,
+        "categoria": "accesorios"
+    },
+    {
+        "id": 8,
+        "img": "./img/sombrero.png",
+        "nombre": "Sombrero Adidas",
+        "talle": ["Único"],
+        "precio": 35,
+        "categoria": "accesorios"
+    },
+    {
+        "id": 9,
+        "img": "./img/botas.png",
+        "nombre": "Botas UGG",
+        "talle": ["36", "37", "38", "39", "40", "41", "42", "43", "44"],
+        "precio": 120,
+        "categoria": "calzado"
+    }
+]
