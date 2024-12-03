@@ -62,7 +62,7 @@ const renderizarProductos = (array) => {
     });
 };
 
-// Función para agregar productos al carrito
+// Función para agregar productos al carrito ========> PENDIENTE: DEFINIR QUE QUEDE EN STOCK 0 LUEGO DE AGREGADO, MOSTRAR "ESTE PRODUCTO YA NO ESTÁ DISPONIBLE"
 const agregarAlCarrito = (producto) => {
     const prodExistente = carrito.find((prod) => prod.id === producto.id);
 
